@@ -1,0 +1,1 @@
+Repo for some of the guides I've written that live in different repos, so I don't have to go searching for them all the time. 
