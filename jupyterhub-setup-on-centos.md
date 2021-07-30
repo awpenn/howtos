@@ -36,17 +36,32 @@ $ systemctl daemon-reload
 - in jupyterhub config ( eg. `/etc/jupyterhub/jupyterhub_config.py` )
     - enable `c.JupyterHub.base_url` variable and set URL, eg. 
     ```
-    c.JupyterHub.base_url = '/dbscripts'
+    c.JupyterHub.bind_url = 'http://:8080/dbscripts/'
     ```
     - restart jupyterhub service
 
 - server:
     - get OV to open the necessary port
-    - at `/etc/httpd/conf.d` add a .conf file, eg. `dbscripts.conf` with the following:
+    - at `/etc/httpd/conf.d` add a .conf file, eg. `dbscripts.conf` with the following: ##7/30/21 this part doesnt work yet
     ```
+    <Proxy *>
+    Allow from localhost
+    </Proxy>
+
     <VirtualHost *:80>
-    ProxyPass /dbscripts http://YOUR.IP:8080/dbscripts
-    ProxyPassReverse /dbscripts http://YOUR.IP:8080/dbscripts
+    #JupyterHub
+    RewriteEngine On
+    RewriteCond %{HTTP:Connection} Upgrade [NC]
+    RewriteCond %{HTTP:Upgrade} websocket [NC]
+    RewriteRule /dbscripts/(.*) ws://127.0.0.1:8080/dbscripts/$1 [P,L]
+    RewriteRule /dbscripts/(.*) http://127.0.0.1:8080/dbscripts/$1 [P,L]
+    
+    #Preserve Host header to avoid cross-origin problems
+    ProxyPreserveHost On
+    #proxy to JupyterHub
+    ProxyPass /dbscripts/ http://127.0.0.1:8080/dbscripts
+    ProxyPassReverse /dbscripts/  http://127.0.0.1:8080/dbscripts
+
     </VirtualHost>
     ```
     - restart httpd
