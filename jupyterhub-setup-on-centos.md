@@ -80,3 +80,14 @@ sudo passwd ( will prompt for password )
 - imported the apps at the same directory level as users.
     - so notebook run command like: `%run -i '../id_db/scripts/main_menu.py'`
     - .env DBIP value is `localhost`
+
+
+## Custom html stuff
+- edit files at `/usr/local/share/jupyterhub/templates/`
+
+
+## 8/9/21 fix
+- if the jupyterhub and proxy starts correctly, that last thing you'll see is something like `now running at http://URL`
+    - if something didnt work right and you keep getting `404 Not Found` from `/` , need to edit `etc/hosts`
+    - check hostname with `hostname` command in CL
+    - add something like `127.0.0.1 kentaurus kentaurus.lisanwanglab.org` to hosts

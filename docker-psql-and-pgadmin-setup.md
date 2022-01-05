@@ -54,7 +54,14 @@ docker run -p 80:80 \
     --name pgadmin \
     -d dpage/pgadmin4
 ```
-- `--rm` means the container and etc will be cleaned up when container is stopped, ie. need to do `run` each time to use  
+- `--rm` means the container and etc will be cleaned up when container is stopped, ie. need to do `run` each time to use, otherwise run
+```
+docker run -p 80:80 \
+    -e 'PGADMIN_DEFAULT_EMAIL=user@tada.com' \
+    -e 'PGADMIN_DEFAULT_PASSWORD=tada' \
+    --name pgadmin \
+    -d dpage/pgadmin4
+```
 
 2. Connect to database
 - go to http://localhost
