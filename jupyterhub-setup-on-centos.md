@@ -34,7 +34,7 @@ $ systemctl daemon-reload
 
 ## Proxy setup
 - in jupyterhub config ( eg. `/etc/jupyterhub/jupyterhub_config.py` )
-    - enable `c.JupyterHub.base_url` variable and set URL, eg. 
+    - enable `c.JupyterHub.base_url` variable and set URL, eg. !<--- say base here but I think mean bind, base is deprecated>
     ```
     c.JupyterHub.bind_url = 'http://:8080/dbscripts/'
     ```
@@ -91,3 +91,27 @@ sudo passwd ( will prompt for password )
     - if something didnt work right and you keep getting `404 Not Found` from `/` , need to edit `etc/hosts`
     - check hostname with `hostname` command in CL
     - add something like `127.0.0.1 kentaurus kentaurus.lisanwanglab.org` to hosts
+
+## 3/35/22 notes following service failure following server/machine reboot
+- moved `jupyterhub.service` from `/var/run` because this directory is meant for temporary files and gets cleared on reboot
+    - moved it to `/etc/systemd/system/` so no need for symlink
+- now service runs, but attempting to reach `url/dbscripts` results in some kind of redirect timeout
+- tried changing `jupyterhub.service` `ExecStart` line from
+```
+ExecStart=/usr/local/bin/jupyterhub --port 8080 ##this will be different!!!
+```
+to 
+```
+ExecStart=/usr/local/bin/jupyterhub --config=/etc/jupyterhub/jupyterhub_config.py --port 8080 ##this will be different!!!
+```
+which maybe changed something in that now trying to access /dbscripts redirects in address bar to /hub/dbscripts, but I can't remember if that was happening previously 
+
+- as per OV, I changed the reference to `/dbscripts` in `jupyterhub_config.py` to use `c.JupyterHub.base_url` instead of `bind_url`, this worked, but need to figure out my `bind_url` doesnt work because `base_url` is deprecated
+
+## 080822 Cross-origin error jupyterhub behind teleport
+- probably has to do with now the url is `jhub-kentaurus.gate.[etc]`
+``` 
+`journalctl -xe`
+Blocking Cross Origin API request for /dbscripts/user/juser-cdb/api/contents/main_menu.ipynb.  Origin: https://jhub-kentaurus.gate.lisanwanglab.org, Host: localhost:8080
+```
+- FIX: had to add `c.Spawner.args = ['--NotebookApp.allow_origin=https://jhub-kentaurus.gate.lisanwanglab.org']` to `jupyterhub_config.py` at `/etc/jupyterhub`

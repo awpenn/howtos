@@ -33,3 +33,5 @@ sudo make altinstall
 
 - now `python3.7 -version` returns correct response
 - can now use `python3.7 -m venv .venv` to create venv and use regular `python` command to use 3.7
+
+
